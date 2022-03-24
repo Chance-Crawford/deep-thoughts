@@ -1,3 +1,10 @@
+// see google docs, MERN Stack Notes, seed the database
+// seeds the mongoDB database
+// this file will run with the command npm run seed.
+// This will connect us to the database, create the seed data, and 
+// insert all of the necessary data and its associated relationships. 
+// The order of operations in this seed.js file is important because we need 
+// user data before we can create thought, reaction, or friend data.
 const faker = require('faker');
 
 const db = require('../config/connection');
