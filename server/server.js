@@ -6,6 +6,9 @@ const { ApolloServer } = require('apollo-server-express');
 const { typeDefs, resolvers } = require('./schemas');
 const db = require('./config/connection');
 
+// auth users using JWT
+const { authMiddleware } = require('./utils/auth');
+
 const PORT = process.env.PORT || 3001;
 const app = express();
 
@@ -18,7 +21,19 @@ const startServer = async () => {
     // of the server
     typeDefs, 
     resolvers, 
-    // context: authMiddleware 
+    // see google docs, MERN Stack Notes, Implement Auth JWT Middleware to Populate Me Query
+    // When you instantiate a new instance of ApolloServer, you can 
+    // pass in a context method that's set to return whatever you 
+    // want available in the resolvers from the req object.
+    // This ensures that every request performs an authentication check, and the 
+    // updated request object will be passed to the resolvers as the context.
+    // Remember, the decoded JWT is only added to context if the verification passes. 
+    // The token includes the user's username, email, and _id properties, which become 
+    // properties of context.user and can be used. 
+    // keep in mind that the current user's JWT will be sent along with every request
+    // that needs authorization.
+    // see utils/auth.js
+    context: authMiddleware
   });
 
   // Start the Apollo server

@@ -1,5 +1,7 @@
 // see google docs, MERN Stack Notes, How GraphQL works
 // import the gql tagged template function
+// Integrated the Apollo Server GraphQL library to handle data requests to our API
+// We've set up our means of retrieving data using GraphQL queries
 const { gql } = require('apollo-server-express');
 
 // see google docs, MERN Stack Notes, Create the Thought Type Definition and Resolver
@@ -75,6 +77,20 @@ gql`
         user(username: String!): User
         thoughts(username: String): [Thought]
         thought(_id: ID!): Thought
+        me: User
+    }
+
+    type Mutation {
+        login(email: String!, password: String!): Auth
+        addUser(username: String!, email: String!, password: String!): Auth
+        addThought(thoughtText: String!): Thought
+        addReaction(thoughtId: ID!, reactionBody: String!): Thought
+        addFriend(friendId: ID!): User
+    }
+
+    type Auth {
+        token: ID!
+        user: User
     }
 `;
 // ^^^^^ thoughts(username: String): [Thought] With this, we've now defined our thoughts query 
@@ -96,6 +112,23 @@ gql`
 // Note that the friends field is an array that will be populated with data that also adheres 
 // to the User type, as a user's friends should follow the same data pattern as that user. Also 
 // notice the thoughts field is an array of Thought types
+// MUTATIONS ----------------------------
+// A GraphQL query retrieves data, which only accounts for one CRUD operation. But what about 
+// creating, updating, and deleting? For those operations, you can use a mutation.
+// Above, the mutation called login accepts arguments for an email and password, that is required.
+// login() mutation and an addUser() mutation. Both will return a Auth object: which contains the
+// JWT and any other optional user info of either the user who 
+// successfully logged in or the user who was just created on sign-up.
+// Note that addReaction() will return the parent Thought instead of the newly created Reaction. 
+// This is because the front end will ultimately track changes on the thought level, 
+// not the reaction level.
+// AUTH ------------------------------
+// Now that we have a way to generate tokens in utils/auth.js, we need to update the 
+// GraphQL type definitions to include it. A token isn't part of the User model, though, 
+// so it doesn't make sense to add it to the User type definition. A token is only
+// generated when a user is logged in. Instead, we'll create a 
+// new type specifically for authentication.
+// This means that an Auth type must return a token and can optionally include any other user data.
 
 // export the typeDefs
 module.exports = typeDefs;
