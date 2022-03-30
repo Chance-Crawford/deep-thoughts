@@ -6,11 +6,16 @@ const { ApolloServer } = require('apollo-server-express');
 const { typeDefs, resolvers } = require('./schemas');
 const db = require('./config/connection');
 
+const path = require('path');
+
 // auth users using JWT
 const { authMiddleware } = require('./utils/auth');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
+
+// *****TO RUN THE SERVER AND CLIENT, type npm run develop. This will run both servers
+// using concurrently
 
 // see google docs, MERN Stack Notes, How GraphQL works
 // Apollo server used to integrate GraphQL with our express server.
@@ -56,6 +61,26 @@ startServer();
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+
+// Serve up static assets
+// We just added two important pieces of code that will only come into effect 
+// when we go into production. First, we check to see if the Node environment 
+// is in production. If it is, we instruct the Express.js server to serve any 
+// files in the React application's build directory in the client folder.
+// remember this is for production only.
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/build')));
+}
+
+// The next set of functionality we created was a wildcard GET route for the 
+// server. In other words, if we make a GET request to any location on the 
+// server that doesn't have an explicit route defined, respond with the production-ready 
+// React front-end code.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+});
+
 
 db.once('open', () => {
   app.listen(PORT, () => {
