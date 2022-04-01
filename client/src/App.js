@@ -15,6 +15,14 @@ import React from 'react';
 // Think of it like middleware for the outbound network requests.
 import { ApolloProvider, ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 
+// The last thing we need to do is instruct the Apollo instance in App.js to 
+// retrieve the token stored in local storage every time we make a GraphQL 
+// request. We'll need to import another function from Apollo Client that will retrieve 
+// the token from localStorage and include it with each request to the API. We set the 
+// JWT auth token in utils/auth.js. It is set whenever a user logs in, they receive a json web token
+// that is stored in their localStorage.
+import { setContext } from '@apollo/client/link/context';
+
 
 // see google docs, MERN Stack Notes, Set Up the Main URL Routes Using React Router.
 // Enables us to use client side routing. Which means that when a user clicks on certain
@@ -54,10 +62,59 @@ const httpLink = createHttpLink({
   uri: '/graphql',
 });
 
+// With the function setContext above from the apollo client, we can create 
+// essentially a middleware function that will retrieve the token for us and combine 
+// it with the existing httpLink.
+// When we need to use a specific function that a library provides us, we might 
+// not need to use every parameter for that function. Often, we can't omit an unused 
+// parameter, because the function is looking for these parameters in a specific 
+// order. In this case, we don't need the first parameter offered by setContext(), 
+// which stores the current request object in case this function is running after 
+// we've initiated a request.
+// Because we're not using the first parameter, but we still need to access 
+// the second one, we can use an underscore _ to serve as a placeholder 
+// for the first parameter.
+// With the configuration of authLink, we use the setContext() function to 
+// retrieve the token from localStorage and set the HTTP request headers of 
+// every request to include the token, whether the request needs it or not. This 
+// is fine, because if the request doesn't need the token, our server-side resolver 
+// function won't check for it.
+// Now that this is in place, we won't have to worry about doing this manually 
+// with every single request. It'll just do it for us!
+// Any time we make a request to the server, we use the code we just implemented 
+// to automatically set the HTTP request headers with our token. This way, our 
+// server can receive the request, check the token's validity, and allow us to 
+// continue our request if it is.
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('id_token');
+  return {
+    // set the header object to have all the other headers, and then add
+    // an authorization header
+    headers: {
+      ...headers,
+      // if there is a token, set authorization header to bearer <token>,
+      // else set the authorization to an empty string.
+      // Any time we make a request to the server, we use the code we just implemented 
+      // to automatically set the HTTP request headers with our token. This way, our 
+      // server can receive the request, check the token's validity, and allow us to 
+      // continue our request if it is.
+      authorization: token ? `Bearer ${token}` : '',
+    },
+  };
+});
+
 // After we create the link, we use the ApolloClient() constructor to instantiate the Apollo 
 // Client instance and create the connection to the API endpoint.
 const client = new ApolloClient({
-  link: httpLink,
+  // Finally, we need to combine the authLink and httpLink objects so that every request 
+  // retrieves the json web token and sets the request headers before making the 
+  // request to the API.
+  // Any time we make a request to the server, we use the code we just implemented a 
+  // few moments ago to automatically set the HTTP request headers with our token. 
+  // This way, our server can receive the request, check the token's validity since all 
+  // requests are now set to have the authorization header, and allow us to 
+  // continue our request if it is.
+  link: authLink.concat(httpLink),
   // We also instantiate a new cache object using new InMemoryCache(). We could customize 
   // this to the application, but by default, it works well for this purpose.
   cache: new InMemoryCache(),

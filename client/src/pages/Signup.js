@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { ADD_USER } from '../utils/mutations';
 
+// see utils/auth.js
+import Auth from '../utils/auth';
 
 const Signup = () => {
   const [formState, setFormState] = useState({ username: '', email: '', password: '' });
@@ -52,8 +54,10 @@ const Signup = () => {
         variables: { ...formState }
       });
 
-      // after user data is returned, log it
-      console.log(data);
+      // after user data is returned, get the user's json web token
+      // and use the custom Auth object to add the token to the 
+      // local storage.
+      Auth.login(data.addUser.token);
     } 
     catch (e) {
       console.error(e);
