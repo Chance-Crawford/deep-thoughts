@@ -31,7 +31,8 @@ const Home = () => {
   // Optional chaining negates the need to check if an object even exists before accessing 
   // its properties. In this case, no data will exist until the query to the server is finished.
   // What we're saying is, if data exists, store it in the thoughts constant we just created. 
-  // If data is undefined, then save an empty array to the thoughts component.
+  // If data is undefined, then save an empty array to the thoughts component. Since this is React,
+  // once the data exists the variable will update automatically and the thought list will render.
   const thoughts = data?.thoughts || [];
   console.log(thoughts);
 
