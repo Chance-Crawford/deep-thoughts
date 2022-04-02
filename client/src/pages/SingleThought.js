@@ -17,6 +17,10 @@ import { QUERY_THOUGHT } from '../utils/queries';
 
 import ReactionList from '../components/ReactionList';
 
+import ReactionForm from '../components/ReactionForm';
+
+import Auth from '../utils/auth';
+
 
 
 const SingleThought = props => {
@@ -71,6 +75,10 @@ const SingleThought = props => {
       passing in the reactions array as a prop to the ReactionList component. 
       props.reactions */}
       {thought.reactionCount > 0 && <ReactionList reactions={thought.reactions} />}
+
+      {/* render the form to add a reaction if the user viewing the page is logged in.
+      pass in the id of the thought that is being displayed. */}
+      {Auth.loggedIn() && <ReactionForm thoughtId={thought._id} />}
     </div>
   );
 };

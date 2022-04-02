@@ -19,6 +19,9 @@ import FriendList from '../components/FriendList';
 
 import ThoughtList from '../components/ThoughtList';
 
+// form to post a thought
+import ThoughtForm from '../components/ThoughtForm';
+
 const Home = () => {
 
   // use Auth class to check if user is logged in with active JWT.
@@ -59,6 +62,12 @@ const Home = () => {
   return (
     <main>
       <div className="flex-row justify-space-between">
+        {/* if user is logged in, render the thought post form */}
+        {loggedIn && (
+          <div className="col-12 mb-3">
+            <ThoughtForm />
+          </div>
+        )}
         {/* With this in place, we're conditionally defining the layout for this <div>. If the 
         user isn't logged in, it'll span the full width of the row. But if you the user is 
         logged in, it'll only span eight columns, leaving space for a four-column <div> on the 

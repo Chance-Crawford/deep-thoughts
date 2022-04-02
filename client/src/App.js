@@ -79,6 +79,7 @@ const httpLink = createHttpLink({
 // every request to include the token, whether the request needs it or not. This 
 // is fine, because if the request doesn't need the token, our server-side resolver 
 // function won't check for it.
+// we check for header authorization in the resolver using the "context" object.
 // Now that this is in place, we won't have to worry about doing this manually 
 // with every single request. It'll just do it for us!
 // Any time we make a request to the server, we use the code we just implemented 

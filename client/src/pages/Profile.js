@@ -12,10 +12,19 @@ import React from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import Auth from '../utils/auth';
 
+// add a friend to the user's friendlist using useMutation hook.
+// useQuery finds the user whos profile was clicked on, or the profile of the
+// user who is logged in.
+import { ADD_FRIEND } from '../utils/mutations';
+import { useQuery, useMutation } from '@apollo/client';
+
 import ThoughtList from '../components/ThoughtList';
 
-import { useQuery } from '@apollo/client';
+// form to post a thought
+import ThoughtForm from '../components/ThoughtForm';
 
+// query user, queries another user's profile.
+// query me, querys the currently logged in user's profile.
 import { QUERY_USER, QUERY_ME } from '../utils/queries';
 
 import FriendList from '../components/FriendList';
@@ -24,6 +33,13 @@ import FriendList from '../components/FriendList';
 
 
 const Profile = () => {
+
+  // destructure the mutation function from ADD_FRIEND so we can use it in a click function.
+  // remember useMutation does not automaticall send request like useQuery does.
+  // it prepares and returns a function that is able to send the mutation request using
+  // the ADD_FRIEND gql query
+  const [addFriend] = useMutation(ADD_FRIEND);
+
   // useParams takes the parameters from the url and
   // turns the the parameters into properties of an object. 
   // the value stored in the parameter username is put into the 
@@ -39,6 +55,7 @@ const Profile = () => {
     // to find the data on the specific user.
     variables: { username: userParam }
   });
+
 
   // The user object that is created afterwards is used to populate the JSX. 
   // This includes passing props to the ThoughtList component to render a list 
@@ -74,6 +91,18 @@ const Profile = () => {
     );
   }
 
+  // handle add friend button click to send mutatioon that adds friend.
+  const handleClick = async () => {
+    try {
+      await addFriend({
+        // send the friendId of the friend the logged in user is wanting to add
+        variables: { id: user._id }
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <div>
       <div className="flex-row mb-3">
@@ -82,6 +111,14 @@ const Profile = () => {
         <h2 className="bg-dark text-secondary p-3 display-inline-block">
           Viewing {userParam ? `${user.username}'s` : 'your'} profile.
         </h2>
+
+        {/* render the add friend button if the user is on any user's profile, except
+        for their own.*/}
+        {userParam && (
+          <button className="btn ml-auto" onClick={handleClick}>
+            Add Friend
+          </button>
+        )}
       </div>
 
       <div className="flex-row justify-space-between mb-3">
@@ -99,6 +136,10 @@ const Profile = () => {
           />
         </div>
       </div>
+      
+      {/* render the thought posting form only if a user is on
+      their own profile page. By checking that there is no userParam. */}
+      <div className="mb-3">{!userParam && <ThoughtForm />}</div>
     </div>
   );
 };

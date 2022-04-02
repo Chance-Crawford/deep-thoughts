@@ -77,6 +77,8 @@ const resolvers = {
     // see google docs, MERN Stack Notes, Implement Auth JWT Middleware to Populate Me Query
     // captures the current user who is logged in from the JWT.
     me: async (parent, args, context) => {
+      // the context is set in App.js with the setContext() where we update the
+      // authorization with the current user's token.
       // if the user is logged in (by having a valid JWT), then a custom field will
       // exist on the context object called user, which holds the data of the current user,
       // such as username, _id and email.
