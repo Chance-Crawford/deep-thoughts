@@ -79,13 +79,19 @@ const httpLink = createHttpLink({
 // every request to include the token, whether the request needs it or not. This 
 // is fine, because if the request doesn't need the token, our server-side resolver 
 // function won't check for it.
+// *******IMPORTANT
+// Remember, the server has an auth file as well that has set up the server
+// to look for the JWT in either the req.body, req.query, or req.header. 
+// here we are sending it with every request in the authoprization header.
 // we check for header authorization in the resolver using the "context" object.
+// The context is set in the server.js file to validate the JWT using a function
+// called authMiddleware() (defined in server/utils/auth.js)
 // Now that this is in place, we won't have to worry about doing this manually 
 // with every single request. It'll just do it for us!
 // Any time we make a request to the server, we use the code we just implemented 
 // to automatically set the HTTP request headers with our token. This way, our 
-// server can receive the request, check the token's validity, and allow us to 
-// continue our request if it is.
+// server can receive the request, use authMiddleware to check the token's validity, and allow us to 
+// continue our request if it is valid.
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem('id_token');
   return {
